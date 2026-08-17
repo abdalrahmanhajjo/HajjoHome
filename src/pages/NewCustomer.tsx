@@ -22,7 +22,8 @@ export default function NewCustomer() {
 
   const [form, setForm] = useState({
     full_name: '', phone_raw: '', phone2_raw: '', area: '', address: '',
-    national_id: '', guarantor_name: '', guarantor_phone: '', manual_balance_usd: '', notes: '',
+    national_id: '', guarantor_name: '', guarantor_phone: '', manual_balance_usd: '',
+    manual_last_payment_date: '', notes: '',
   })
   const [dups, setDups] = useState<DupMatch[]>([])
   const [checking, setChecking] = useState(false)
@@ -74,6 +75,7 @@ export default function NewCustomer() {
       guarantor_name: form.guarantor_name.trim() || null,
       guarantor_phone: form.guarantor_phone.trim() || null,
       manual_balance_usd: manualBalance,
+      manual_last_payment_date: form.manual_last_payment_date || null,
       notes: form.notes.trim() || null,
       created_by: profile?.id ?? null,
     }
@@ -156,6 +158,20 @@ export default function NewCustomer() {
               />
               <div className="faint small mt-1">
                 {t('دين على الزبون بدون إضافة منتجات أو فاتورة.', 'Debt owed by the customer without products or an invoice.')}
+              </div>
+            </div>
+
+            <div className="field">
+              <label>{t('تاريخ آخر دفعة', 'Last payment date')}</label>
+              <input
+                className="input num"
+                dir="ltr"
+                type="date"
+                value={form.manual_last_payment_date}
+                onChange={(e) => update('manual_last_payment_date', e.target.value)}
+              />
+              <div className="faint small mt-1">
+                {t('موعد الدفعة التالية يُحسب تلقائيًا بعد شهر.', 'The next payment is automatically due one month later.')}
               </div>
             </div>
 

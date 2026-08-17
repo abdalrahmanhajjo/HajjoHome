@@ -8,10 +8,10 @@ import Modal from '../components/Modal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { useToast } from '../components/Toast'
 import { phoneSearchDigits, displayPhone } from '../lib/phone'
-import { formatUsd, formatNumber, balanceClass } from '../lib/format'
+import { formatUsd, formatNumber, formatDate, balanceClass } from '../lib/format'
 import type { CustomerBalance, Customer } from '../lib/types'
 
-type Filter = 'all' | 'debt' | 'settled' | 'archived'
+type Filter = 'all' | 'debt' | 'overdue' | 'settled' | 'archived'
 
 const FETCH_BATCH_SIZE = 1000
 const PAGE_SIZE = 24
@@ -75,6 +75,7 @@ export default function Customers() {
       active: active.length,
       outstanding,
       inDebt,
+      overdue: active.filter((c) => c.payment_tracking_status === 'overdue').length,
       settled: active.length - inDebt,
       archived: all.length - active.length,
     }
@@ -89,6 +90,7 @@ export default function Customers() {
       else {
         if (archived) return false
         if (filter === 'debt' && c.balance_usd <= 0.005) return false
+        if (filter === 'overdue' && c.payment_tracking_status !== 'overdue') return false
         if (filter === 'settled' && c.balance_usd > 0.005) return false
       }
       if (!term && !digits) return true
@@ -176,6 +178,7 @@ export default function Customers() {
           {([
             { k: 'all', label: t('الكل', 'All'), count: stats.active },
             { k: 'debt', label: t('لديهم ديون', 'In debt'), count: stats.inDebt },
+            { k: 'overdue', label: t('متأخرون بالدفع', 'Payment overdue'), count: stats.overdue },
             { k: 'settled', label: t('مسدّدون', 'Settled'), count: stats.settled },
             { k: 'archived', label: t('المؤرشفة', 'Archived'), count: stats.archived },
           ] as { k: Filter; label: string; count: number }[]).map((p) => (
@@ -222,6 +225,15 @@ export default function Customers() {
                         {formatUsd(c.balance_usd)}
                       </span>
                     </div>
+                    {c.next_payment_due_date && c.balance_usd > 0.005 && (
+                      <div className="between small" style={{ marginBottom: 'var(--sp-2)' }}>
+                        <span className="faint">{t('الدفعة التالية', 'Next payment')}</span>
+                        <span className={`num badge ${c.payment_tracking_status === 'overdue' ? 'badge--danger' : c.payment_tracking_status === 'due_today' ? 'badge--warn' : 'badge--muted'}`}>
+                          {formatDate(c.next_payment_due_date)}
+                          {c.payment_tracking_status === 'overdue' && ` · ${c.payment_days_overdue} ${t('يوم', 'days')}`}
+                        </span>
+                      </div>
+                    )}
                     <div className="bar"><div className="bar__fill" style={{ width: `${paidPct}%` }} /></div>
                     <div className="between small faint" style={{ marginTop: 'var(--sp-1)' }}>
                       <span className="num">{formatUsd(c.paid_usd)} {t('مدفوع', 'paid')}</span>
@@ -366,6 +378,7 @@ function CustomerEditForm({ customer, onSaved }: { customer: Customer; onSaved: 
     guarantor_name: customer.guarantor_name ?? '',
     guarantor_phone: customer.guarantor_phone ?? '',
     manual_balance_usd: String(customer.manual_balance_usd ?? 0),
+    manual_last_payment_date: customer.manual_last_payment_date ?? '',
     notes: customer.notes ?? '',
   })
   const [busy, setBusy] = useState(false)
@@ -396,6 +409,7 @@ function CustomerEditForm({ customer, onSaved }: { customer: Customer; onSaved: 
         guarantor_name: form.guarantor_name.trim() || null,
         guarantor_phone: form.guarantor_phone.trim() || null,
         manual_balance_usd: manualBalance,
+        manual_last_payment_date: form.manual_last_payment_date || null,
         notes: form.notes.trim() || null,
       })
       .eq('id', customer.id)
@@ -438,6 +452,19 @@ function CustomerEditForm({ customer, onSaved }: { customer: Customer; onSaved: 
         />
         <div className="faint small mt-1">
           {t('يمكن تعديله بدون إضافة منتجات أو فاتورة.', 'Can be edited without adding products or an invoice.')}
+        </div>
+      </div>
+      <div className="field">
+        <label>{t('تاريخ آخر دفعة', 'Last payment date')}</label>
+        <input
+          className="input num"
+          dir="ltr"
+          type="date"
+          value={form.manual_last_payment_date}
+          onChange={(e) => update('manual_last_payment_date', e.target.value)}
+        />
+        <div className="faint small mt-1">
+          {t('موعد الدفعة التالية يُحسب تلقائيًا بعد شهر.', 'The next payment is automatically due one month later.')}
         </div>
       </div>
       <div className="field"><label>{t('ملاحظات', 'Notes')}</label><textarea className="textarea" rows={2} value={form.notes} onChange={(e) => update('notes', e.target.value)} /></div>

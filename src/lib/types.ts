@@ -36,6 +36,7 @@ export interface Customer {
   guarantor_name: string | null
   guarantor_phone: string | null
   manual_balance_usd: number
+  manual_last_payment_date: string | null
   status: CustomerStatus
   notes: string | null
   created_at: string
@@ -52,6 +53,10 @@ export interface CustomerBalance {
   paid_usd: number
   balance_usd: number
   manual_balance_usd: number
+  manual_last_payment_date: string | null
+  next_payment_due_date: string | null
+  payment_tracking_status: 'settled' | 'unscheduled' | 'overdue' | 'due_today' | 'current'
+  payment_days_overdue: number
   orders_count: number
   open_orders: number
   last_order_date: string | null

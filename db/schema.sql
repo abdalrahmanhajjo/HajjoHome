@@ -154,6 +154,7 @@ create table customers (
   guarantor_name  text,
   guarantor_phone text,
   manual_balance_usd numeric(14,2) not null default 0 check (manual_balance_usd >= 0),
+  manual_last_payment_date date,
   status          customer_status not null default 'active',
   notes           text,
 
@@ -843,8 +844,22 @@ select
   coalesce(o.orders_count, 0)           as orders_count,
   coalesce(o.open_orders, 0)            as open_orders,
   o.last_order_date,
-  pay.last_payment_date,
-  c.manual_balance_usd
+  greatest(pay.last_payment_date, c.manual_last_payment_date::timestamptz) as last_payment_date,
+  c.manual_balance_usd,
+  c.manual_last_payment_date,
+  (greatest(pay.last_payment_date::date, c.manual_last_payment_date) + interval '1 month')::date as next_payment_due_date,
+  case
+    when c.manual_balance_usd + coalesce(o.purchases_usd, 0) - coalesce(pay.paid_usd, 0) <= 0.005 then 'settled'
+    when greatest(pay.last_payment_date::date, c.manual_last_payment_date) is null then 'unscheduled'
+    when (greatest(pay.last_payment_date::date, c.manual_last_payment_date) + interval '1 month')::date < current_date then 'overdue'
+    when (greatest(pay.last_payment_date::date, c.manual_last_payment_date) + interval '1 month')::date = current_date then 'due_today'
+    else 'current'
+  end as payment_tracking_status,
+  case
+    when (greatest(pay.last_payment_date::date, c.manual_last_payment_date) + interval '1 month')::date < current_date
+      then current_date - (greatest(pay.last_payment_date::date, c.manual_last_payment_date) + interval '1 month')::date
+    else 0
+  end as payment_days_overdue
 from customers c
 left join (
   select customer_id,

@@ -128,6 +128,21 @@ export default function CustomerFile() {
           <div className="kpi__label">{t('فواتير مفتوحة', 'Open invoices')}</div>
           <div className="kpi__value num">{balance?.open_orders ?? 0}</div>
         </div>
+        <div className="card kpi">
+          <div className="kpi__label">{t('الدفعة التالية', 'Next payment')}</div>
+          <div className={`kpi__value num ${balance?.payment_tracking_status === 'overdue' ? 'money--debt' : ''}`}>
+            {balance?.next_payment_due_date ? formatDate(balance.next_payment_due_date) : '—'}
+          </div>
+          <div className="small faint">
+            {t('آخر دفعة:', 'Last payment:')}{' '}
+            <span className="num">{balance?.last_payment_date ? formatDate(balance.last_payment_date) : '—'}</span>
+          </div>
+          {balance?.payment_tracking_status === 'overdue' && (
+            <div className="small money--debt">
+              {t(`متأخر ${balance.payment_days_overdue} يوم`, `${balance.payment_days_overdue} days overdue`)}
+            </div>
+          )}
+        </div>
       </section>
 
       {/* بيانات الاتصال */}
