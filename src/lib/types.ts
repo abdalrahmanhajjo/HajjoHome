@@ -35,6 +35,7 @@ export interface Customer {
   national_id: string | null
   guarantor_name: string | null
   guarantor_phone: string | null
+  manual_balance_usd: number
   status: CustomerStatus
   notes: string | null
   created_at: string
@@ -50,6 +51,7 @@ export interface CustomerBalance {
   purchases_usd: number
   paid_usd: number
   balance_usd: number
+  manual_balance_usd: number
   orders_count: number
   open_orders: number
   last_order_date: string | null

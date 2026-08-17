@@ -22,7 +22,7 @@ export default function NewCustomer() {
 
   const [form, setForm] = useState({
     full_name: '', phone_raw: '', phone2_raw: '', area: '', address: '',
-    national_id: '', guarantor_name: '', guarantor_phone: '', notes: '',
+    national_id: '', guarantor_name: '', guarantor_phone: '', manual_balance_usd: '', notes: '',
   })
   const [dups, setDups] = useState<DupMatch[]>([])
   const [checking, setChecking] = useState(false)
@@ -59,6 +59,10 @@ export default function NewCustomer() {
     e.preventDefault()
     setError(null)
     if (!nameTrim) return setError(t('الاسم مطلوب', 'Name is required'))
+    const manualBalance = Number(form.manual_balance_usd || '0')
+    if (!Number.isFinite(manualBalance) || manualBalance < 0) {
+      return setError(t('أدخل رصيدًا صحيحًا لا يقل عن صفر', 'Enter a valid balance of zero or more'))
+    }
     setSaving(true)
     const payload = {
       full_name: nameTrim,
@@ -69,6 +73,7 @@ export default function NewCustomer() {
       national_id: form.national_id.trim() || null,
       guarantor_name: form.guarantor_name.trim() || null,
       guarantor_phone: form.guarantor_phone.trim() || null,
+      manual_balance_usd: manualBalance,
       notes: form.notes.trim() || null,
       created_by: profile?.id ?? null,
     }
@@ -133,6 +138,24 @@ export default function NewCustomer() {
               <div className="field">
                 <label>{t('هاتف الكفيل', 'Guarantor phone')}</label>
                 <input className="input num" dir="ltr" value={form.guarantor_phone} onChange={(e) => update('guarantor_phone', e.target.value)} />
+              </div>
+            </div>
+
+            <div className="field">
+              <label>{t('الرصيد اليدوي (دولار)', 'Manual balance (USD)')}</label>
+              <input
+                className="input num"
+                dir="ltr"
+                inputMode="decimal"
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.manual_balance_usd}
+                onChange={(e) => update('manual_balance_usd', e.target.value)}
+                placeholder="0.00"
+              />
+              <div className="faint small mt-1">
+                {t('دين على الزبون بدون إضافة منتجات أو فاتورة.', 'Debt owed by the customer without products or an invoice.')}
               </div>
             </div>
 

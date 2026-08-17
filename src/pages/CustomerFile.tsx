@@ -115,6 +115,12 @@ export default function CustomerFile() {
           <div className="kpi__value num">{formatUsd(balance?.purchases_usd ?? 0)}</div>
         </div>
         <div className="card kpi">
+          <div className="kpi__label">{t('الرصيد اليدوي', 'Manual balance')}</div>
+          <div className={`kpi__value ${balanceClass(balance?.manual_balance_usd ?? 0)}`}>
+            {formatUsd(balance?.manual_balance_usd ?? 0)}
+          </div>
+        </div>
+        <div className="card kpi">
           <div className="kpi__label">{t('إجمالي المدفوع', 'Total paid')}</div>
           <div className="kpi__value num">{formatUsd(balance?.paid_usd ?? 0)}</div>
         </div>

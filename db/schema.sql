@@ -153,6 +153,7 @@ create table customers (
   national_id     text,
   guarantor_name  text,
   guarantor_phone text,
+  manual_balance_usd numeric(14,2) not null default 0 check (manual_balance_usd >= 0),
   status          customer_status not null default 'active',
   notes           text,
 
@@ -838,11 +839,12 @@ select
   c.status,
   coalesce(o.purchases_usd, 0)          as purchases_usd,
   coalesce(pay.paid_usd, 0)             as paid_usd,
-  coalesce(o.purchases_usd, 0) - coalesce(pay.paid_usd, 0) as balance_usd,
+  c.manual_balance_usd + coalesce(o.purchases_usd, 0) - coalesce(pay.paid_usd, 0) as balance_usd,
   coalesce(o.orders_count, 0)           as orders_count,
   coalesce(o.open_orders, 0)            as open_orders,
   o.last_order_date,
-  pay.last_payment_date
+  pay.last_payment_date,
+  c.manual_balance_usd
 from customers c
 left join (
   select customer_id,

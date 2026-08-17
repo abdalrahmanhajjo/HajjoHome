@@ -198,7 +198,8 @@ export default function Customers() {
         ) : (
           <div className="card-grid">
             {pageRows.map((c) => {
-              const paidPct = c.purchases_usd > 0 ? Math.min(100, Math.round((c.paid_usd / c.purchases_usd) * 100)) : 100
+              const totalCharges = c.purchases_usd + c.manual_balance_usd
+              const paidPct = totalCharges > 0 ? Math.min(100, Math.round((c.paid_usd / totalCharges) * 100)) : 100
               const archived = c.status === 'inactive'
               return (
                 <div key={c.customer_id} className="ent-card">
@@ -364,6 +365,7 @@ function CustomerEditForm({ customer, onSaved }: { customer: Customer; onSaved: 
     national_id: customer.national_id ?? '',
     guarantor_name: customer.guarantor_name ?? '',
     guarantor_phone: customer.guarantor_phone ?? '',
+    manual_balance_usd: String(customer.manual_balance_usd ?? 0),
     notes: customer.notes ?? '',
   })
   const [busy, setBusy] = useState(false)
@@ -377,6 +379,10 @@ function CustomerEditForm({ customer, onSaved }: { customer: Customer; onSaved: 
     e.preventDefault()
     setError(null)
     if (!form.full_name.trim()) return setError(t('الاسم مطلوب', 'Name is required'))
+    const manualBalance = Number(form.manual_balance_usd || '0')
+    if (!Number.isFinite(manualBalance) || manualBalance < 0) {
+      return setError(t('أدخل رصيدًا صحيحًا لا يقل عن صفر', 'Enter a valid balance of zero or more'))
+    }
     setBusy(true)
     const { error } = await supabase
       .from('customers')
@@ -389,6 +395,7 @@ function CustomerEditForm({ customer, onSaved }: { customer: Customer; onSaved: 
         national_id: form.national_id.trim() || null,
         guarantor_name: form.guarantor_name.trim() || null,
         guarantor_phone: form.guarantor_phone.trim() || null,
+        manual_balance_usd: manualBalance,
         notes: form.notes.trim() || null,
       })
       .eq('id', customer.id)
@@ -416,6 +423,22 @@ function CustomerEditForm({ customer, onSaved }: { customer: Customer; onSaved: 
       <div className="row">
         <div className="field"><label>{t('اسم الكفيل', 'Guarantor name')}</label><input className="input" value={form.guarantor_name} onChange={(e) => update('guarantor_name', e.target.value)} /></div>
         <div className="field"><label>{t('هاتف الكفيل', 'Guarantor phone')}</label><input className="input num" dir="ltr" value={form.guarantor_phone} onChange={(e) => update('guarantor_phone', e.target.value)} /></div>
+      </div>
+      <div className="field">
+        <label>{t('الرصيد اليدوي (دولار)', 'Manual balance (USD)')}</label>
+        <input
+          className="input num"
+          dir="ltr"
+          inputMode="decimal"
+          type="number"
+          min="0"
+          step="0.01"
+          value={form.manual_balance_usd}
+          onChange={(e) => update('manual_balance_usd', e.target.value)}
+        />
+        <div className="faint small mt-1">
+          {t('يمكن تعديله بدون إضافة منتجات أو فاتورة.', 'Can be edited without adding products or an invoice.')}
+        </div>
       </div>
       <div className="field"><label>{t('ملاحظات', 'Notes')}</label><textarea className="textarea" rows={2} value={form.notes} onChange={(e) => update('notes', e.target.value)} /></div>
       <button className="btn btn--primary btn--block" type="submit" disabled={busy}>{busy ? <span className="spinner" /> : t('حفظ التغييرات', 'Save changes')}</button>
