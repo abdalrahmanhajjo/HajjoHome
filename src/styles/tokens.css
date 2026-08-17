@@ -1,0 +1,103 @@
+/* ---------------------------------------------------------------------
+   الرموز التصميمية — ثيم StoreFlow (أحادي اللون، تحريري، شريط جانبي داكن ثابت)
+   المصدر الوحيد للألوان. لا يُكتب أي لون مباشرة في المكوّنات — var(--...) فقط.
+   الوضع الفاتح افتراضي؛ الوضع الداكن عبر [data-theme='dark'] على <html>.
+   --------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+
+  /* الأسطح */
+  --c-bg:            #efefec;   /* paper */
+  --c-surface:       #ffffff;   /* card */
+  --c-surface-2:     #f4f4f1;   /* paper-raise */
+  --c-border:        #e3e3df;   /* line */
+  --c-border-strong: #d6d6d1;   /* line-strong */
+
+  /* النص (حبر) */
+  --c-text:          #131312;
+  --c-text-muted:    #5c5c57;
+  --c-text-faint:    #6d6d67;
+
+  /* اللون الأساسي — أحادي (أسود شبه تام)، ليس أزرق */
+  --c-primary:       #131312;
+  --c-primary-hover: #000000;
+  --c-primary-soft:  #f0f0ed;
+  --c-on-primary:    #ffffff;
+
+  /* الحالات */
+  --c-success:       #2e7d43;
+  --c-success-soft:  #e6efe7;
+  --c-warning:       #a8731d;
+  --c-warning-soft:  #f2ead3;
+  --c-danger:        #c93d2e;
+  --c-danger-soft:   #f8e7e3;
+
+  --c-debt:          #c93d2e;
+  --c-credit:        #2e7d43;
+
+  /* الشريط الجانبي الداكن (ثابت في الوضعين) */
+  --c-shell:       #111110;
+  --c-shell-raise: #1c1c1a;
+  --c-shell-line:  #2a2a27;
+  --c-shell-text:  #f4f4f1;
+  --c-shell-muted: #8f8f87;
+
+  /* المسافات */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+
+  /* الزوايا والظلال */
+  --radius-1: 8px;
+  --radius-2: 12px;
+  --radius-3: 14px;
+  --shadow-1: 0 1px 2px rgba(19, 19, 18, 0.04);
+  --shadow-2: 0 14px 30px -14px rgba(19, 19, 18, 0.22), 0 3px 8px -4px rgba(19, 19, 18, 0.08);
+
+  /* الخطوط — Archivo للّاتيني/الأرقام، وخط عربي احتياطي للعربية */
+  --font-sans: 'Archivo', 'Noto Kufi Arabic', 'Segoe UI', 'Tahoma', system-ui, sans-serif;
+  --font-num:  'Archivo', 'Noto Kufi Arabic', ui-monospace, monospace;
+
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-lg: 17px;
+  --fs-xl: 22px;
+  --fs-2xl: 30px;
+
+  --line: 1.55;
+  --sidebar-w: 244px;
+  --topbar-h: 62px;
+}
+
+/* الوضع الداكن — نفس المتغيّرات بقيم داكنة، والشريط الجانبي يبقى داكنًا */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --c-bg:            #161615;
+  --c-surface:       #1c1c1b;
+  --c-surface-2:     #1a1a19;
+  --c-border:        #2c2c2a;
+  --c-border-strong: #3b3b38;
+
+  --c-text:          #f0f0ec;
+  --c-text-muted:    #b3b3ab;
+  --c-text-faint:    #93938b;
+
+  --c-primary:       #f0f0ec;
+  --c-primary-hover: #ffffff;
+  --c-primary-soft:  #222221;
+  --c-on-primary:    #0b0b0a;
+
+  --c-success:       #7cc492;
+  --c-success-soft:  #1f2c23;
+  --c-warning:       #d3a24d;
+  --c-warning-soft:  #332c1c;
+  --c-danger:        #e57866;
+  --c-danger-soft:   #342019;
+
+  --c-debt:          #e57866;
+  --c-credit:        #7cc492;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 16px 34px -16px rgba(0, 0, 0, 0.6);
+}
